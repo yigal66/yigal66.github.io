@@ -1,223 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title></title>
-	<meta name="generator" content="LibreOffice 25.8.5.2 (Linux)"/>
-	<meta name="created" content="2026-03-06T09:23:12.293755273"/>
-	<meta name="changed" content="2026-03-06T13:13:40.686881865"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuga Lock</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #111827; color: #f0f0f0;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 40px 20px;
+  }
+  h1  { font-size: 1.6rem; margin-bottom: 4px; }
+  .sub { color: #6b7280; font-size: 0.85rem; margin-bottom: 32px; }
+
+  #btnConnect {
+    width: 100%; max-width: 340px; padding: 16px;
+    border: none; border-radius: 14px;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    margin-bottom: 28px; background: #1a73e8; color: #fff;
+    transition: background .2s;
+  }
+  #btnConnect.connected { background: #059669; }
+
+  .state-card {
+    width: 100%; max-width: 340px; background: #1f2937;
+    border-radius: 20px; padding: 32px 20px; text-align: center;
+    margin-bottom: 20px; border: 2px solid #374151;
+    transition: border-color .3s;
+  }
+  .state-card.unlocked { border-color: #00d4aa; }
+  .state-card.locked   { border-color: #ef5350; }
+  .car-emoji { font-size: 80px; line-height: 1; margin-bottom: 14px; }
+  .car-label { font-size: 1.5rem; font-weight: 800; letter-spacing: .06em; }
+  .car-label.unlocked { color: #00d4aa; }
+  .car-label.locked   { color: #ef5350; }
+
+  .rssi-wrap { width: 100%; max-width: 340px; margin-bottom: 20px; }
+  .rssi-label {
+    font-size: 0.78rem; color: #9ca3af; margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+  }
+  .rssi-track { height: 10px; background: #374151; border-radius: 5px; overflow: hidden; }
+  .rssi-fill  {
+    height: 100%; width: 0; border-radius: 5px;
+    background: linear-gradient(90deg, #ef5350, #ffb300, #00d4aa);
+    transition: width .5s;
+  }
+
+  .btn-row { display: flex; gap: 14px; width: 100%; max-width: 340px; margin-bottom: 20px; }
+  .btn-row button {
+    flex: 1; padding: 22px 0; border-radius: 16px;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+    border: 2px solid transparent; transition: opacity .15s;
+  }
+  .btn-row button:active { opacity: .7; }
+  .btn-unlock { background: #00d4aa22; border-color: #00d4aa !important; color: #00d4aa; }
+  .btn-lock   { background: #ef535022; border-color: #ef5350 !important; color: #ef5350; }
+
+  .log {
+    width: 100%; max-width: 340px; background: #1f2937;
+    border-radius: 12px; padding: 12px 14px;
+    font-size: 0.75rem; color: #6b7280;
+    max-height: 130px; overflow-y: auto;
+  }
+  .log p { margin-bottom: 4px; }
+  .log p.ok  { color: #00d4aa; }
+  .log p.err { color: #ef5350; }
+  .log p.inf { color: #9ca3af; }
+</style>
 </head>
-<body lang="en-US" dir="ltr"><pre style="font-style: normal; widows: 2; border-top: 1px solid #2a2a45; border-bottom: 1px solid #2a2a45; border-left: 1px solid #2a2a45; border-right: none; padding-top: 0.17in; padding-bottom: 0.17in; padding-left: 0.17in; padding-right: 0in; font-weight: normal; letter-spacing: normal; orphans: 2; font-variant: normal; line-height: 165%"><font color="#c8f0c8"><font face="Courier New, monospace">&lt;!DOCTYPE html&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;html&gt;&lt;head&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;meta charset=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;UTF-8&quot;</font></span>&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;meta name=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;viewport&quot;</font></span> content=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;width=device-width,initial-scale=1&quot;</font></span>&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;title&gt;Kuga Lock&lt;/title&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;style&gt;</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">* { box-sizing:border-box; margin:0; padding:0; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">body { font-family:sans-serif; background:#111827; color:#f0f0f0;</span></span></font></font>
-<font color="#c8f0c8">         <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">display:flex; flex-direction:column; align-items:center;</span></span></font></font>
-<font color="#c8f0c8">         <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">min-height:100vh; padding:32px 20px; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">h1  { font-size:1.5rem; margin-bottom:2px; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.sub { color:#6b7280; font-size:0.82rem; margin-bottom:28px; }</span></span></font></font>
+<body>
 
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">/* Connection button */</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">#btnConnect {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">width:100%; max-width:340px; padding:16px; border:none; border-radius:14px;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">font-size:1rem; font-weight:700; cursor:pointer; margin-bottom:28px;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">background:#1a73e8; color:#fff; transition:background .2s;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">#btnConnect.connected { background:#059669; }</span></span></font></font>
+<h1>🚗 Kuga Lock</h1>
+<p class="sub">Ford Kuga 2016 · BLE Remote</p>
 
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">/* Car state card */</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.state-card {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">width:100%; max-width:340px; background:#1f2937; border-radius:20px;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">padding:28px 20px; text-align:center; margin-bottom:20px;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">border:2px solid #374151; transition:border-color .3s;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.state-card.unlocked { border-color:#00d4aa; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.state-card.locked   { border-color:#ef5350; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.car-emoji { font-size:72px; line-height:1; margin-bottom:12px; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.car-label { font-size:1.4rem; font-weight:800; letter-spacing:.06em; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.car-label.unlocked { color:#00d4aa; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.car-label.locked   { color:#ef5350; }</span></span></font></font>
+<button id="btnConnect" onclick="connectBLE()">🔵 Connect to Car</button>
 
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">/* RSSI bar */</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.rssi-wrap { width:100%; max-width:340px; margin-bottom:20px; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.rssi-label { font-size:0.78rem; color:#9ca3af; margin-bottom:6px;</span></span></font></font>
-<font color="#c8f0c8">                <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">display:flex; justify-content:space-between; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.rssi-track { height:10px; background:#374151; border-radius:5px; overflow:hidden; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.rssi-fill  { height:100%; width:0; border-radius:5px;</span></span></font></font>
-<font color="#c8f0c8">                <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">background:linear-gradient(90deg,#ef5350,#ffb300,#00d4aa);</span></span></font></font>
-<font color="#c8f0c8">                <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">transition:width .5s; }</span></span></font></font>
+<div class="state-card locked" id="stateCard">
+  <div class="car-emoji" id="carEmoji">🔒</div>
+  <div class="car-label locked" id="carLabel">LOCKED</div>
+</div>
 
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">/* Manual buttons */</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.btn-row { display:flex; gap:14px; width:100%; max-width:340px; margin-bottom:20px; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.btn-row button {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">flex:1; padding:20px 0; border-radius:16px; font-size:1rem;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">font-weight:700; cursor:pointer; border:2px solid transparent;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">transition:opacity .15s;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.btn-row button:active { opacity:.7; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.btn-unlock { background:#00d4aa22; border-color:#00d4aa !important; color:#00d4aa; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.btn-lock   { background:#ef535022; border-color:#ef5350 !important; color:#ef5350; }</span></span></font></font>
+<div class="rssi-wrap">
+  <div class="rssi-label">
+    <span>📶 Signal Strength</span>
+    <span id="rssiVal">-- dBm</span>
+  </div>
+  <div class="rssi-track"><div class="rssi-fill" id="rssiFill"></div></div>
+</div>
 
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">/* Status log */</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.log { width:100%; max-width:340px; background:#1f2937; border-radius:12px;</span></span></font></font>
-<font color="#c8f0c8">         <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">padding:12px 14px; font-size:0.75rem; color:#6b7280;</span></span></font></font>
-<font color="#c8f0c8">         <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">max-height:110px; overflow-y:auto; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.log p { margin-bottom:3px; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.log p.ok  { color:#00d4aa; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.log p.err { color:#ef5350; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">.log p.inf { color:#9ca3af; }</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/style&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/head&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;body&gt;</font></font>
+<div class="btn-row">
+  <button class="btn-unlock" onclick="sendCmd(0x01)">🔓 UNLOCK</button>
+  <button class="btn-lock"   onclick="sendCmd(0x02)">🔒 LOCK</button>
+</div>
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;h1&gt;🚗 Kuga Lock&lt;/h1&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;p class=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;sub&quot;</font></span>&gt;Ford Kuga 2016 · BLE Remote&lt;/p&gt;</font></font>
+<div class="log" id="log">
+  <p class="inf">▸ Tap Connect to pair with KugaLock ESP32</p>
+</div>
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;button id=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;btnConnect&quot;</font></span> onclick=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;connectBLE()&quot;</font></span>&gt;🔵 Connect to Car&lt;/button&gt;</font></font>
+<script>
+const SVC    = '12345678-1234-1234-1234-123456789abc';
+const C_CMD  = 'abcd1234-ab12-cd34-ef56-abcdef012345';
+const C_STAT = 'abcd1235-ab12-cd34-ef56-abcdef012345';
+const C_RSSI = 'abcd1236-ab12-cd34-ef56-abcdef012345';
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;div class=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;state-card locked&quot;</font></span> id=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;stateCard&quot;</font></span>&gt;</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;div class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;car-emoji&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal"> id=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;carEmoji&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;🔒&lt;/div&gt;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;div class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;car-label locked&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal"> id=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;carLabel&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;LOCKED&lt;/div&gt;</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/div&gt;</font></font>
+let cmdChar = null;
+let device  = null;
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;div class=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;rssi-wrap&quot;</font></span>&gt;</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;div class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;rssi-label&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;span&gt;📶 Signal Strength&lt;/span&gt;</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;span id=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;rssiVal&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;-- dBm&lt;/span&gt;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;/div&gt;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;div class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;rssi-track&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;&lt;div class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;rssi-fill&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal"> id=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;rssiFill&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;&lt;/div&gt;&lt;/div&gt;</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/div&gt;</font></font>
+function log(msg, cls = 'inf') {
+  const d = document.getElementById('log');
+  const p = document.createElement('p');
+  p.className = cls;
+  p.textContent = '▸ ' + msg;
+  d.appendChild(p);
+  d.scrollTop = d.scrollHeight;
+}
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;div class=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;btn-row&quot;</font></span>&gt;</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;button class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;btn-unlock&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal"> onclick=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;sendCmd(0x01)&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;🔓 UNLOCK&lt;/button&gt;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;button class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;btn-lock&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">   onclick=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;sendCmd(0x02)&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;🔒 LOCK&lt;/button&gt;</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/div&gt;</font></font>
+function setCarState(locked) {
+  document.getElementById('stateCard').className = 'state-card ' + (locked ? 'locked' : 'unlocked');
+  document.getElementById('carEmoji').textContent  = locked ? '🔒' : '🔓';
+  document.getElementById('carLabel').className    = 'car-label ' + (locked ? 'locked' : 'unlocked');
+  document.getElementById('carLabel').textContent  = locked ? 'LOCKED' : 'UNLOCKED';
+}
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;div class=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;log&quot;</font></span> id=<span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">&quot;log&quot;</font></span>&gt;</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&lt;p class=</span></span></font><span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178"><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&quot;inf&quot;</span></span></font></font></span><font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">&gt;▸ Tap Connect to pair with KugaLock ESP32&lt;/p&gt;</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/div&gt;</font></font>
+function setRSSI(rssi) {
+  document.getElementById('rssiVal').textContent = rssi + ' dBm';
+  const pct = Math.max(0, Math.min(100, ((rssi - (-100)) / 70) * 100));
+  document.getElementById('rssiFill').style.width = pct + '%';
+}
 
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;script&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">const SVC    = <span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">'12345678-1234-1234-1234-123456789abc'</font></span>;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">const C_CMD  = <span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">'abcd1234-ab12-cd34-ef56-abcdef012345'</font></span>; // write 0x01/0x02</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">const C_STAT = <span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">'abcd1235-ab12-cd34-ef56-abcdef012345'</font></span>; // notify LOCKED/UNLOCKED</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">const C_RSSI = <span style="display: inline-block; border: none; padding: 0in"><font color="#ce9178">'abcd1236-ab12-cd34-ef56-abcdef012345'</font></span>; // notify RSSI string</font></font>
+async function connectBLE() {
+  if (!navigator.bluetooth) {
+    log('Web Bluetooth not available. Enable: chrome://flags → Experimental Web Platform Features', 'err');
+    return;
+  }
+  try {
+    log('Scanning for KugaLock...');
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ name: 'KugaLock' }],
+      optionalServices: [SVC]
+    });
+    device.addEventListener('gattserverdisconnected', () => {
+      log('Disconnected — reconnecting...', 'err');
+      cmdChar = null;
+      const btn = document.getElementById('btnConnect');
+      btn.className = '';
+      btn.textContent = '🔵 Reconnect';
+      setTimeout(doConnect, 2000);
+    });
+    await doConnect();
+  } catch(e) {
+    log('Error: ' + e.message, 'err');
+  }
+}
 
-<font color="#c8f0c8"><font face="Courier New, monospace">let cmdChar = null, device = null;</font></font>
+async function doConnect() {
+  try {
+    log('Connecting...');
+    const server  = await device.gatt.connect();
+    const service = await server.getPrimaryService(SVC);
 
-<font color="#c8f0c8"><font face="Courier New, monospace">function log(msg, cls='inf') {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const d = document.getElementById('log');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const p = document.createElement('p');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">p.className = cls;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">p.textContent = '▸ ' + msg;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">d.appendChild(p);</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">d.scrollTop = d.scrollHeight;</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
+    cmdChar = await service.getCharacteristic(C_CMD);
 
-<font color="#c8f0c8"><font face="Courier New, monospace">function setCarState(locked) {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const card  = document.getElementById('stateCard');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const emoji = document.getElementById('carEmoji');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const label = document.getElementById('carLabel');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">card.className  = 'state-card ' + (locked ? 'locked' : 'unlocked');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">emoji.textContent = locked ? '🔒' : '🔓';</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">label.className = 'car-label ' + (locked ? 'locked' : 'unlocked');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">label.textContent = locked ? 'LOCKED' : 'UNLOCKED';</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
+    const statChar = await service.getCharacteristic(C_STAT);
+    await statChar.startNotifications();
+    statChar.addEventListener('characteristicvaluechanged', e => {
+      const val = new TextDecoder().decode(e.target.value).trim();
+      setCarState(val === 'LOCKED');
+      log('State: ' + val, val === 'LOCKED' ? 'inf' : 'ok');
+    });
 
-<font color="#c8f0c8"><font face="Courier New, monospace">function setRSSI(rssi) {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">document.getElementById('rssiVal').textContent = rssi + ' dBm';</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">// Map -100..-30 dBm → 0..100%</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const pct = Math.max(0, Math.min(100, ((rssi - (-100)) / 70) * 100));</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">document.getElementById('rssiFill').style.width = pct + '%';</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
+    const rssiChar = await service.getCharacteristic(C_RSSI);
+    await rssiChar.startNotifications();
+    rssiChar.addEventListener('characteristicvaluechanged', e => {
+      const rssi = parseInt(new TextDecoder().decode(e.target.value));
+      if (!isNaN(rssi)) setRSSI(rssi);
+    });
 
-<font color="#c8f0c8"><font face="Courier New, monospace">async function connectBLE() {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">if (!navigator.bluetooth) {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Web Bluetooth not available — enable chrome://flags → Experimental Web Platform Features', 'err');</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">return;</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">try {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Scanning for KugaLock...');</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">device = await navigator.bluetooth.requestDevice({</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">filters: [{ name: 'KugaLock' }],</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">optionalServices: [SVC]</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">});</span></span></font></font>
+    const btn = document.getElementById('btnConnect');
+    btn.textContent = '✅ Connected to KugaLock';
+    btn.className = 'connected';
+    log('Connected! Proximity unlock active.', 'ok');
+  } catch(e) {
+    log('Connect failed: ' + e.message, 'err');
+    setTimeout(doConnect, 3000);
+  }
+}
 
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">device.addEventListener('gattserverdisconnected', () =&gt; {</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Disconnected — reconnecting...', 'err');</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">document.getElementById('btnConnect').className = '';</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">document.getElementById('btnConnect').textContent = '🔵 Reconnect';</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">cmdChar = null;</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">setTimeout(reconnect, 2000);</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">});</span></span></font></font>
-
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">await doConnect();</span></span></font></font>
-
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">} catch(e) {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Error: ' + e.message, 'err');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
-
-<font color="#c8f0c8"><font face="Courier New, monospace">async function doConnect() {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">try {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Connecting to ' + device.name + '...');</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const server  = await device.gatt.connect();</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const service = await server.getPrimaryService(SVC);</span></span></font></font>
-
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">cmdChar = await service.getCharacteristic(C_CMD);</span></span></font></font>
-
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">// Subscribe to lock state notifications</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const statChar = await service.getCharacteristic(C_STAT);</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">await statChar.startNotifications();</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">statChar.addEventListener('characteristicvaluechanged', e =&gt; {</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const val = new TextDecoder().decode(e.target.value);</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const locked = val.trim() === 'LOCKED';</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">setCarState(locked);</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('State: ' + val.trim(), locked ? 'inf' : 'ok');</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">});</span></span></font></font>
-
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">// Subscribe to RSSI notifications</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const rssiChar = await service.getCharacteristic(C_RSSI);</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">await rssiChar.startNotifications();</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">rssiChar.addEventListener('characteristicvaluechanged', e =&gt; {</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const rssi = parseInt(new TextDecoder().decode(e.target.value));</span></span></font></font>
-<font color="#c8f0c8">      <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">if (!isNaN(rssi)) setRSSI(rssi);</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">});</span></span></font></font>
-
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">const btn = document.getElementById('btnConnect');</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">btn.textContent = '✅ Connected to KugaLock';</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">btn.className = 'connected';</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Connected! Proximity unlock active.', 'ok');</span></span></font></font>
-
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">} catch(e) {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Connect failed: ' + e.message, 'err');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
-
-<font color="#c8f0c8"><font face="Courier New, monospace">async function reconnect() {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">if (device &amp;&amp; !device.gatt.connected) {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">await doConnect().catch(() =&gt; setTimeout(reconnect, 3000));</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
-
-<font color="#c8f0c8"><font face="Courier New, monospace">async function sendCmd(byte) {</font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">if (!cmdChar) { log('Not connected — tap Connect first', 'err'); return; }</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">try {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">await cmdChar.writeValue(new Uint8Array([byte]));</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log(byte === 0x01 ? 'Manual UNLOCK sent' : 'Manual LOCK sent',</span></span></font></font>
-<font color="#c8f0c8">        <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">byte === 0x01 ? 'ok' : 'inf');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">} catch(e) {</span></span></font></font>
-<font color="#c8f0c8">    <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">log('Send error: ' + e.message, 'err');</span></span></font></font>
-<font color="#c8f0c8">  <font face="Courier New, monospace"><span style="font-style: normal"><span style="font-weight: normal">}</span></span></font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">}</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/script&gt;</font></font>
-<font color="#c8f0c8"><font face="Courier New, monospace">&lt;/body&gt;&lt;/html&gt;</font></font></pre><p>
-<br/>
-<br/>
-
-</p>
+async function sendCmd(byte) {
+  if (!cmdChar) { log('Not connected — tap Connect first', 'err'); return; }
+  try {
+    await cmdChar.writeValue(new Uint8Array([byte]));
+    log(byte === 0x01 ? 'Manual UNLOCK sent' : 'Manual LOCK sent',
+        byte === 0x01 ? 'ok' : 'inf');
+  } catch(e) {
+    log('Send error: ' + e.message, 'err');
+  }
+}
+</script>
 </body>
 </html>
